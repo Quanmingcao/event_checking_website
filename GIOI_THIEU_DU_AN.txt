@@ -1,0 +1,38 @@
+TÊN DỰ ÁN: EVENT CHECK-IN REALTIME (Phiên bản 2.0)
+
+1. TỔNG QUAN
+Đây là ứng dụng Web App phục vụ công tác check-in tại các sự kiện với yêu cầu tốc độ cao và phản hồi theo thời gian thực (Realtime). Hệ thống được thiết kế để mang lại trải nghiệm chuyên nghiệp, "Wow" cho khách tham dự và sự tiện lợi tối đa cho ban tổ chức.
+
+2. CÁC NHÓM ĐỐI TƯỢNG SỬ DỤNG
+- Admin (Ban tổ chức): Tạo sự kiện, quản lý danh sách khách mời (Import Excel/CSV), xem báo cáo thống kê.
+- Staff (Nhân viên check-in): Sử dụng điện thoại/máy tính bảng quét mã QR trên vé mời để check-in cho khách cực nhanh.
+- Monitor (Màn hình lớn): Hiển thị thông tin chào mừng khách mời ngay lập tức khi họ vừa check-in xong (Welcome Screen).
+
+3. TÍNH NĂNG NỔI BẬT
+A. Quản lý Sự kiện & Khách mời
+- Import danh sách khách mời dễ dàng từ file Excel/CSV hoặc Google Sheet.
+- Tự động xử lý dữ liệu trùng lặp.
+- Quản lý thông tin chi tiết: Họ tên, Chức vụ, Đơn vị, Phân loại VIP.
+
+B. Hệ thống Check-in Thông minh
+- Quét QR Code tốc độ cao trên thiết bị di động.
+- Phản hồi trạng thái tức thì:
+  + XANH: Check-in thành công.
+  + VÀNG: Đã check-in trước đó (cảnh báo).
+  + ĐỎ: Không tìm thấy thông tin (vé giả/sai).
+- Hỗ trợ chế độ Offline (tự động đồng bộ khi có mạng - tính năng V2).
+- Hỗ trợ tìm kiếm và check-in thủ công nếu khách quên vé.
+
+C. Màn hình Chào mừng (Realtime)
+- Hiển thị thông tin khách mời ngay khi Staff quét mã thành công.
+- Giao diện đẹp mắt, hiệu ứng hiện đại (Glassmorphism), trang trọng.
+- Hiệu ứng đặc biệt dành riêng cho khách VIP.
+
+4. CÔNG NGHỆ SỬ DỤNG (TECH STACK)
+- Frontend: ReactJS (Vite), TypeScript.
+- Giao diện (UI): Tailwind CSS (Thiết kế hiện đại, responsive).
+- Backend & Database: Supabase (Sử dụng PostgreSQL và tính năng Realtime).
+- Tiện ích khác: html5-qrcode (Quét mã), ngrok (Hỗ trợ test local).
+
+5. MỤC TIÊU PHIÊN BẢN 2.0
+Nâng cấp toàn diện về giao diện (UI/UX), bổ sung các tính năng an toàn (Mã PIN bảo vệ), hoạt động ổn định trong môi trường mạng kém (Offline mode) và báo cáo chi tiết sau sự kiện.
