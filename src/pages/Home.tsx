@@ -13,6 +13,7 @@ export default function Home() {
   const [formData, setFormData] = useState({
       name: '',
       location: '',
+      description: '',
       start_time: '',
       end_time: ''
   });
@@ -77,6 +78,7 @@ export default function Home() {
               { 
                   name: formData.name,
                   location: formData.location,
+                  description: formData.description,
                   start_time: formData.start_time || null,
                   end_time: formData.end_time || null,
                   event_code: code,
@@ -86,7 +88,7 @@ export default function Home() {
           ]);
           if (error) throw error;
           
-          setFormData({ name: '', location: '', start_time: '', end_time: '' });
+          setFormData({ name: '', location: '', description: '', start_time: '', end_time: '' });
           setShowModal(false);
           // fetchEvents is usually handled by realtime, but we can also manually refresh to be safe
           fetchEvents();
@@ -241,6 +243,18 @@ export default function Home() {
                                               value={formData.location}
                                               onChange={e => setFormData({...formData, location: e.target.value})}
                                               placeholder="Ví dụ: Tầng 3, Khách sạn Melia"
+                                          />
+                                      </div>
+                                      <div>
+                                          <label htmlFor="description" className="block text-sm font-medium text-gray-700">Mô tả</label>
+                                          <textarea
+                                              name="description"
+                                              id="description"
+                                              rows={3}
+                                              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                              value={formData.description}
+                                              onChange={e => setFormData({...formData, description: e.target.value})}
+                                              placeholder="Thông tin thêm về sự kiện..."
                                           />
                                       </div>
                                       <div className="grid grid-cols-2 gap-4">

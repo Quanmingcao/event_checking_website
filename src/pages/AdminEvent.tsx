@@ -217,6 +217,85 @@ export default function AdminEvent() {
     setImportPreview(mapped.slice(0, 5));
   };
 
+  const handleExportExcel = () => {
+      if (!event) return;
+
+      const wb = XLSX.utils.book_new();
+      const wsName = "Event Report";
+
+      // 1. Prepare Data
+      // Header Info
+      const data: any[] = [
+          ["BÁO CÁO CHI TIẾT SỰ KIỆN"], // Row 0: Title
+          [""],
+          ["THÔNG TIN CHUNG"], // Row 2
+          ["Tên sự kiện", event.name],
+          ["Mã sự kiện", event.event_code],
+          ["Thời gian", event.start_time ? new Date(event.start_time).toLocaleString('vi-VN') : ''],
+          ["Địa điểm", event.location || ''],
+          ["Mô tả", event.description || ''],
+          [""],
+          ["THỐNG KÊ"], // Row 9
+          ["Tổng khách mời", attendants.length],
+          ["Đã Check-in", attendants.filter(a => a.checked_in_at).length],
+          ["Chưa đến", attendants.filter(a => !a.checked_in_at).length],
+          ["Tỷ lệ tham dự", attendants.length > 0 ? `${Math.round((attendants.filter(a => a.checked_in_at).length / attendants.length) * 100)}%` : '0%'],
+          [""],
+          ["DANH SÁCH KHÁCH MỜI"], // Row 14
+          ["STT", "Họ tên", "Mã", "Đơn vị / Tổ chức", "Chức vụ", "Ghế / Nhóm", "VIP", "Trạng thái", "Thời gian Check-in", "Email", "SĐT"] // Table Header
+      ];
+
+      // Append Guests
+      attendants.forEach((guest, index) => {
+          data.push([
+              index + 1,
+              guest.full_name,
+              guest.code,
+              guest.organization || '',
+              guest.position || '',
+              guest.seat_location || '', // Group is tricky to get name here without joining, using seat for now
+              guest.is_vip ? "VIP" : "",
+              guest.checked_in_at ? "Có mặt" : "Vắng",
+              guest.checked_in_at ? new Date(guest.checked_in_at).toLocaleString('vi-VN') : '',
+              guest.email || '',
+              guest.phone || ''
+          ]);
+      });
+
+      // 2. Create Sheet
+      const ws = XLSX.utils.aoa_to_sheet(data);
+
+      // 3. Styling & Merges (Note: Basic XLSX version doesn't support rich styling in free version easily, but merges work)
+      // Merge functionality is often in pro version or requires specific cell object manipulation. 
+      // standard xlsx library supports merges via !merges property.
+      
+      ws['!merges'] = [
+          { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } }, // Merge Title
+      ];
+
+      // 4. Set Column Widths
+      ws['!cols'] = [
+          { wch: 5 },  // STT
+          { wch: 25 }, // Name
+          { wch: 10 }, // Code
+          { wch: 25 }, // Org
+          { wch: 15 }, // Position
+          { wch: 15 }, // Seat
+          { wch: 8 },  // VIP
+          { wch: 12 }, // Status
+          { wch: 20 }, // Checkin Time
+          { wch: 25 }, // Email
+          { wch: 15 }  // Phone
+      ];
+
+      XLSX.utils.book_append_sheet(wb, ws, wsName);
+
+      // 5. Write File
+      const dateStr = new Date().toISOString().split('T')[0];
+      const sanitizedName = event.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+      XLSX.writeFile(wb, `${sanitizedName}_report_${dateStr}.xlsx`);
+  };
+
   const executeImport = async () => {
     if (!importData.length || !id) return;
     setImporting(true);
@@ -267,9 +346,19 @@ export default function AdminEvent() {
                         <Copy className="w-4 h-4" />
                     </button>
                 </div>
+                {event.description && (
+                    <p className="text-sm text-gray-500 mt-1 max-w-2xl">{event.description}</p>
+                )}
             </div>
         </div>
         <div className="flex space-x-2">
+            <button
+                onClick={handleExportExcel}
+                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 uppercase"
+            >
+                <Download className="h-4 w-4 mr-2" />
+                Xuất Báo Cáo
+            </button>
             <button
                 onClick={() => {
                     const url = `${window.location.origin}/face-checkin/${id}`;
@@ -303,7 +392,7 @@ export default function AdminEvent() {
                 onClick={() => setActiveTab('settings')}
                 className={`px-4 py-2 text-sm font-medium rounded-md ${activeTab === 'settings' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500 hover:text-gray-700'}`}
             >
-                Cài đặt
+                Thông tin & Cài đặt
             </button>
         </div>
       </div>
@@ -427,7 +516,52 @@ export default function AdminEvent() {
         <div className="bg-white shadow sm:rounded-lg p-6">
             <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Cài đặt sự kiện</h3>
             
+
             <div className="space-y-6">
+                <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
+                    <h4 className="text-sm font-medium text-gray-900 mb-4 uppercase tracking-wide">Thông tin chung</h4>
+                    <div className="grid grid-cols-1 gap-4">
+                         <div>
+                            <label className="block text-sm font-medium text-gray-700">Tên sự kiện</label>
+                            <input 
+                                type="text" 
+                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                value={event.name}
+                                onChange={(e) => setEvent({...event, name: e.target.value})}
+                                onBlur={async () => {
+                                    await supabase.from('events').update({ name: event.name }).eq('id', event.id);
+                                }}
+                            />
+                         </div>
+                         <div>
+                            <label className="block text-sm font-medium text-gray-700">Địa điểm</label>
+                            <input 
+                                type="text" 
+                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                value={event.location || ''}
+                                onChange={(e) => setEvent({...event, location: e.target.value})}
+                                onBlur={async () => {
+                                    await supabase.from('events').update({ location: event.location }).eq('id', event.id);
+                                }}
+                            />
+                         </div>
+                         <div>
+                            <label className="block text-sm font-medium text-gray-700">Mô tả</label>
+                            <textarea 
+                                rows={4}
+                                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                value={event.description || ''}
+                                onChange={(e) => setEvent({...event, description: e.target.value})}
+                                onBlur={async () => {
+                                    await supabase.from('events').update({ description: event.description }).eq('id', event.id);
+                                }}
+                                placeholder="Mô tả chi tiết về sự kiện..."
+                            />
+                            <p className="mt-1 text-xs text-gray-500">Thông tin tự động lưu khi bạn click ra ngoài.</p>
+                         </div>
+                    </div>
+                </div>
+
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Ảnh nền sự kiện (Background)</label>
                     <p className="text-sm text-gray-500 mb-2">Ảnh này sẽ hiển thị trên màn hình Monitor/Check-in.</p>

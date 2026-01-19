@@ -5,6 +5,7 @@ export interface Event {
     location?: string;
     organizer?: string;
     image_url?: string;
+    description?: string;
     start_time?: string;
     end_time?: string;
     created_at?: string;
