@@ -21,7 +21,7 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 # Use slightly smaller model 'buffalo_l' or 'buffalo_s' (Scrub/Small)
 # 'buffalo_l' is more accurate.
 print("Loading InsightFace Model...")
-face_app = FaceAnalysis(name='buffalo_s') 
+face_app = FaceAnalysis(name='buffalo_l') 
 face_app.prepare(ctx_id=0, det_size=(640, 640))
 print("Model Loaded!")
 
