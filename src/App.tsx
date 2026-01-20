@@ -11,6 +11,7 @@ import PublicFaceRegister from './pages/PublicFaceRegister';
 import Login from './pages/Login';
 import StaffLogin from './pages/StaffLogin';
 import AdminUsers from './pages/AdminUsers';
+import Dashboard from './pages/Dashboard';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
               <Layout />
             </ProtectedRoute>
           }>
+            <Route path="dashboard" element={<Dashboard />} />
             <Route index element={<Home />} />
             <Route path="admin/events/:id" element={<AdminEvent />} />
             <Route path="admin/users" element={<AdminUsers />} />
