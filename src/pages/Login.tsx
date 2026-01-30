@@ -52,8 +52,8 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="mx-auto h-16 w-16 bg-white rounded-full flex items-center justify-center shadow-md">
-          <Lock className="h-8 w-8 text-indigo-600" />
+        <div className="mx-auto h-20 w-auto flex items-center justify-center">
+          <img src="/logocheckin.png" alt="Logo" className="h-20 w-auto" />
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
           Đăng nhập hệ thống

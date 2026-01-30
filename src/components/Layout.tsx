@@ -24,7 +24,7 @@ export default function Layout() {
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
                  <Link to="/" className="flex items-center">
-                    <Calendar className="h-8 w-8 text-indigo-600" />
+                    <img src="/logocheckin.png" alt="Logo" className="h-10 w-auto" />
                     <span className="ml-2 text-xl font-bold text-gray-900">Event Check-in</span>
                  </Link>
               </div>
