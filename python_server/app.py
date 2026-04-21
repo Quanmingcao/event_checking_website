@@ -4,6 +4,7 @@ import numpy as np
 import time
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import traceback
 from insightface.app import FaceAnalysis
 from supabase import create_client, Client
 
@@ -204,8 +205,24 @@ def create_user():
         })
 
     except Exception as e:
-        print("Create User Error:", e)
-        return jsonify({"error": str(e)}), 500
+        print("--- CREATE USER ERROR ---")
+        traceback.print_exc() # Logs full stack trace to HF console
+        
+        # Check if error is from Supabase Auth
+        error_msg = str(e)
+        status_code = 500
+        
+        if "already exists" in error_msg.lower():
+            error_msg = "Email này đã được sử dụng."
+            status_code = 400
+        elif "Password" in error_msg:
+            error_msg = "Mật khẩu không đủ mạnh hoặc không hợp lệ."
+            status_code = 400
+            
+        return jsonify({
+            "status": "error",
+            "error": error_msg
+        }), status_code
 
 if __name__ == '__main__':
     print("Starting Flask Server on port 5000...")

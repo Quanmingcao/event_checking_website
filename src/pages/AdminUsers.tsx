@@ -51,6 +51,12 @@ export default function AdminUsers() {
         body: JSON.stringify(formData),
       });
 
+      // 1. Check if the response is HTML (common on HF if server crashes or is sleeping)
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('text/html')) {
+        throw new Error('Hệ thống AI đang bận hoặc đang khởi động lại (Hugging Face). Vui lòng thử lại sau 10-20 giây.');
+      }
+
       const result = await response.json();
 
       if (!response.ok) {
