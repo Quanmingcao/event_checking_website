@@ -373,9 +373,7 @@ export default function AdminEvent() {
                         <Copy className="w-4 h-4" />
                     </button>
                 </div>
-                {event.description && (
-                    <p className="text-sm text-gray-500 mt-1 max-w-2xl">{event.description}</p>
-                )}
+
             </div>
         </div>
         <div className="flex space-x-2">
@@ -584,8 +582,34 @@ export default function AdminEvent() {
                                 }}
                                 placeholder="Mô tả chi tiết về sự kiện..."
                             />
-                            <p className="mt-1 text-xs text-gray-500">Thông tin tự động lưu khi bạn click ra ngoài.</p>
                          </div>
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Thời gian bắt đầu</label>
+                                <input 
+                                    type="datetime-local" 
+                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                    value={event.start_time ? event.start_time.slice(0, 16) : ''}
+                                    onChange={(e) => setEvent({...event, start_time: e.target.value})}
+                                    onBlur={async () => {
+                                        await supabase.from('events').update({ start_time: event.start_time || null }).eq('id', event.id);
+                                    }}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Thời gian kết thúc</label>
+                                <input 
+                                    type="datetime-local" 
+                                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                    value={event.end_time ? event.end_time.slice(0, 16) : ''}
+                                    onChange={(e) => setEvent({...event, end_time: e.target.value})}
+                                    onBlur={async () => {
+                                        await supabase.from('events').update({ end_time: event.end_time || null }).eq('id', event.id);
+                                    }}
+                                />
+                            </div>
+                         </div>
+                         <p className="mt-1 text-xs text-gray-500">Thông tin tự động lưu khi bạn thay đổi và click ra ngoài.</p>
                     </div>
                 </div>
 
