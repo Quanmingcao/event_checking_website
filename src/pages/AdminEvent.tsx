@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Event, Attendant, CheckinLog } from '../types';
 import { Calendar, MapPin, Users, Download, Search, Filter, Trash2, Edit, Plus, UserPlus, FileUp, Copy, Check, ArrowLeft, Upload, Save, RefreshCw, Image as ImageIcon } from 'lucide-react';
@@ -9,6 +9,7 @@ import { AdminGroups } from '../components/AdminGroups';
 
 export default function AdminEvent() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [event, setEvent] = useState<Event | null>(null);
   const [attendants, setAttendants] = useState<Attendant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -164,6 +165,32 @@ export default function AdminEvent() {
       };
     }
   }, [id]);
+
+  const handleDeleteEvent = async () => {
+    if (!event || !id) return;
+    
+    if (!window.confirm(`CẢNH BÁO: Bạn đang thực hiện xóa sự kiện "${event.name}". \n\nHành động này sẽ xóa vĩnh viễn: \n- Toàn bộ danh sách khách mời \n- Toàn bộ lịch sử điểm danh \n- Các nhóm/đơn vị đã tạo. \n\nBạn có chắc chắn muốn tiếp tục?`)) {
+        return;
+    }
+
+    try {
+        setLoading(true);
+        // Delete related data first
+        await supabase.from('checkin_logs').delete().eq('event_id', id);
+        await supabase.from('attendants').delete().eq('event_id', id);
+        await supabase.from('event_groups').delete().eq('event_id', id);
+        
+        // Delete event
+        const { error } = await supabase.from('events').delete().eq('id', id);
+        if (error) throw error;
+
+        alert('Sự kiện đã được xóa thành công.');
+        navigate('/');
+    } catch (err: any) {
+        alert('Lỗi khi xóa sự kiện: ' + err.message);
+        setLoading(false);
+    }
+  };
 
   const fetchEventDetails = async () => {
     const { data } = await supabase.from('events').select('*').eq('id', id).single();
@@ -633,6 +660,21 @@ export default function AdminEvent() {
                             {uploadingBg && <p className="mt-2 text-sm text-indigo-600">Đang tải lên...</p>}
                         </div>
                     </div>
+                </div>
+
+                <div className="pt-6 mt-6 border-t border-red-100 bg-red-50/30 p-6 rounded-lg border-2 border-dashed">
+                    <h4 className="text-lg font-bold text-red-700 mb-2">Vùng nguy hiểm (Danger Zone)</h4>
+                    <p className="text-sm text-red-600 mb-4">
+                        Xóa sự kiện này sẽ xóa toàn bộ dữ liệu vĩnh viễn và không thể khôi phục. 
+                        Hãy chắc chắn bạn đã xuất báo cáo Excel trước khi thực hiện hành động này.
+                    </p>
+                    <button
+                        onClick={handleDeleteEvent}
+                        className="inline-flex items-center px-6 py-3 border border-transparent text-base font-bold rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 transition-all hover:scale-105 active:scale-95"
+                    >
+                        <Trash2 className="h-5 w-5 mr-2" />
+                        XÓA VĨNH VIỄN SỰ KIỆN NÀY
+                    </button>
                 </div>
             </div>
         </div>

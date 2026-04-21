@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Event } from '../types';
 import { Link } from 'react-router-dom';
-import { Calendar, QrCode, Monitor, Settings, Plus, MapPin, Clock, X } from 'lucide-react';
+import { Calendar, QrCode, Monitor, Settings, Plus, MapPin, Clock, X, Trash2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function Home() {
@@ -99,6 +99,26 @@ export default function Home() {
       }
   };
 
+  const handleDeleteEvent = async (eventId: string, eventName: string) => {
+      if (!window.confirm(`Bạn có chắc chắn muốn xóa sự kiện "${eventName}"? Toàn bộ dữ liệu khách mời và lịch sử điểm danh sẽ bị xóa vĩnh viễn.`)) {
+          return;
+      }
+
+      try {
+          // Delete in order to handle potential FK constraints
+          await supabase.from('checkin_logs').delete().eq('event_id', eventId);
+          await supabase.from('attendants').delete().eq('event_id', eventId);
+          await supabase.from('event_groups').delete().eq('event_id', eventId);
+          const { error } = await supabase.from('events').delete().eq('id', eventId);
+
+          if (error) throw error;
+          
+          setEvents(prev => prev.filter(e => e.id !== eventId));
+      } catch (err: any) {
+          alert('Lỗi khi xóa sự kiện: ' + err.message);
+      }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -131,9 +151,18 @@ export default function Home() {
                     </h3>
                     <p className="text-sm text-gray-500">Mã: <span className="font-mono bg-gray-100 px-1 rounded">{event.event_code}</span></p>
                  </div>
-                 <div className="ml-2 flex-shrink-0 bg-indigo-100 rounded-full p-2">
-                    <Calendar className="h-5 w-5 text-indigo-600" />
-                 </div>
+                  <div className="ml-2 flex-shrink-0 flex items-center space-x-1">
+                     <button 
+                        onClick={() => handleDeleteEvent(event.id, event.name)}
+                        className="p-1.5 text-gray-400 hover:text-red-600 transition-colors"
+                        title="Xóa sự kiện"
+                     >
+                        <Trash2 className="h-4 w-4" />
+                     </button>
+                     <div className="bg-indigo-100 rounded-full p-2">
+                        <Calendar className="h-5 w-5 text-indigo-600" />
+                     </div>
+                  </div>
               </div>
               
               <div className="space-y-2 text-sm text-gray-600">
